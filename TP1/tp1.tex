@@ -1,0 +1,83 @@
+\section{Metodología}
+
+Los análisis realizados en este trabajo fueron organizados con el objetivo de construir progresivamente una caracterización estructural de las redes estudiadas antes de abordar el problema central de robustez. Para ello, primero se realizó un preprocesamiento de los grafos y una caracterización topológica general de cada dataset. Posteriormente, se analizaron propiedades de organización interna mediante métricas de centralidad y detección de comunidades. Finalmente, se estudió la respuesta estructural de las redes frente a ataques aleatorios y dirigidos.
+
+Para todos los análisis se utilizaron herramientas de teoría de redes implementadas en Python mediante las librerías \texttt{NetworkX}, \texttt{NumPy}, \texttt{SciPy} y \texttt{Matplotlib}. Siguiendo las recomendaciones de la consigna, se eliminaron autoenlaces en todos los grafos. En el caso de grafos no dirigidos se trabajó sobre la componente gigante, mientras que para grafos dirigidos se utilizó la componente fuertemente conectada más grande. Esta restricción evita sesgos asociados a componentes triviales o nodos aislados y garantiza comparabilidad entre métricas globales.
+
+Inicialmente se realizó una caracterización topológica de ambas redes mediante métricas descriptivas globales. Se calcularon el número de nodos y enlaces, el grado medio, la densidad, el coeficiente de clustering promedio, la longitud mínima promedio de caminos y el diámetro de cada red. Además, se estudiaron las distribuciones de grado y, en el caso del conectoma de \textit{C. elegans}, se analizaron separadamente las distribuciones de in-degree y out-degree debido al carácter dirigido del grafo.
+
+La distribución de grado permitió evaluar el nivel de heterogeneidad estructural de cada red y detectar la presencia de hubs. Complementariamente, el clustering medio permitió cuantificar el grado de redundancia local y conectividad entre vecinos, mientras que las distancias mínimas promedio permitieron evaluar propiedades tipo \textit{small-world}. Estas métricas constituyen la base para interpretar posteriormente el comportamiento de robustez.
+
+Con el objetivo de contextualizar estructuralmente los datasets reales, se compararon las redes con modelos prototipo clásicos de redes complejas: Erdős--Rényi (ER), Watts--Strogatz (WS) y Barabási--Albert (BA). Debido a que estos modelos están definidos sobre grafos no dirigidos y no pesados, las redes originales fueron transformadas temporalmente a versiones simples no dirigidas para esta comparación. Para cada dataset se generaron múltiples realizaciones de cada modelo preservando el número de nodos y aproximando el grado medio observado.
+
+Las comparaciones se realizaron principalmente mediante la distribución de grado, el coeficiente de clustering medio y la longitud mínima promedio de caminos. El modelo ER se utilizó como referencia de redes aleatorias homogéneas, el modelo WS como representación de redes \textit{small-world} con alto clustering local y el modelo BA como ejemplo de redes heterogéneas dominadas por hubs.
+
+Posteriormente se analizaron distintas medidas de centralidad con el objetivo de identificar nodos estructuralmente relevantes. Para la red Email-EU se calcularon centralidad de grado y centralidad de intermediación, mientras que para \textit{C. elegans} se estudiaron in-degree, out-degree y PageRank. La centralidad de grado permite identificar nodos altamente conectados y potenciales hubs estructurales. La centralidad de intermediación cuantifica cuántos caminos mínimos atraviesan un nodo, identificando vértices críticos para la conectividad global. Por otro lado, PageRank permite detectar nodos relevantes considerando no sólo la cantidad sino también la importancia de sus conexiones entrantes.
+
+Como parte de la caracterización general de las redes, también se realizó detección de comunidades mediante el algoritmo de Louvain, el cual busca maximizar la modularidad de la partición:
+
+\[
+Q = \frac{1}{2m}\sum_{ij}\left(A_{ij} - \frac{k_i k_j}{2m}\right)\delta(c_i,c_j)
+\]
+
+donde \(A_{ij}\) representa la matriz de adyacencia, \(k_i\) y \(k_j\) corresponden al grado de cada nodo y \(\delta(c_i,c_j)\) vale uno cuando ambos nodos pertenecen a la misma comunidad. Adicionalmente, se compararon los resultados obtenidos con el algoritmo de Girvan--Newman, basado en la eliminación iterativa de enlaces con alta intermediación.
+
+Finalmente, se realizó el análisis de robustez de las redes. El procedimiento consistió en eliminar iterativamente los enlaces asociados a nodos seleccionados según diferentes estrategias de ataque. Se comparó la eliminación aleatoria de nodos con ataques dirigidos basados en centralidad.
+
+Para cuantificar la degradación estructural se utilizó el tamaño relativo de la componente gigante:
+
+\[
+\frac{N_g}{N}
+\]
+
+donde \(N_g\) representa el tamaño de la componente gigante remanente y \(N\) el número total de nodos de la red original.
+
+En el caso de las redes no dirigidas también se calculó la eficiencia global:
+
+\[
+E = \frac{1}{N(N-1)}\sum_{i \neq j}\frac{1}{d_{ij}}
+\]
+
+donde \(d_{ij}\) representa la distancia mínima entre los nodos \(i\) y \(j\). Esta métrica permite detectar degradaciones funcionales incluso antes de observar fragmentación macroscópica. Además de las curvas tradicionales de robustez, se estudió la evolución de los tamaños de los fragmentos generados durante los ataques, permitiendo distinguir entre colapsos abruptos y procesos de fragmentación gradual.
+
+\section{Resultados y discusión}
+
+La caracterización topológica inicial mostró diferencias estructurales significativas entre las redes analizadas. En el caso de la red Email-EU, la distribución de grado presentó una estructura relativamente homogénea, aunque con la presencia de ciertos nodos altamente conectados que actúan como hubs institucionales. El coeficiente de clustering promedio resultó elevado respecto a una red aleatoria equivalente, indicando una fuerte tendencia a la formación de grupos locales densamente conectados. Además, la longitud mínima promedio entre nodos permaneció relativamente baja, sugiriendo propiedades tipo \textit{small-world} características de redes sociales.
+
+Por otro lado, el conectoma de \textit{C. elegans} exhibió una estructura más heterogénea y jerárquica. Las distribuciones de in-degree y out-degree mostraron colas más pesadas, evidenciando la existencia de neuronas altamente conectadas que concentran gran parte del tráfico sináptico. La red también presentó clustering elevado y distancias promedio pequeñas, aunque con una organización más asimétrica debido a su naturaleza dirigida.
+
+La comparación entre ambas redes sugirió diferencias importantes en los mecanismos organizacionales subyacentes. Mientras que la red social mostró una estructura modular relativamente distribuida, el conectoma neuronal presentó una dependencia más marcada de nodos centrales específicos. Estas diferencias estructurales resultaron particularmente relevantes para anticipar distintos comportamientos frente a ataques dirigidos.
+
+La comparación con modelos prototipo permitió contextualizar estas observaciones. Ninguna de las redes pudo ser reproducida satisfactoriamente mediante modelos Erdős--Rényi, ya que estos generan distribuciones de grado demasiado homogéneas y coeficientes de clustering significativamente menores a los observados empíricamente. Los modelos Watts--Strogatz reprodujeron parcialmente las propiedades \textit{small-world}, particularmente las distancias mínimas reducidas y el clustering elevado, aunque no lograron capturar adecuadamente la heterogeneidad observada en las distribuciones de grado.
+
+En contraste, los modelos Barabási--Albert lograron reproducir parcialmente la presencia de hubs y la heterogeneidad estructural, especialmente en el conectoma de \textit{C. elegans}. Sin embargo, dichos modelos subestimaron el clustering local de las redes reales. Esto sugiere que los datasets estudiados combinan simultáneamente propiedades de redes heterogéneas y estructuras modulares densamente conectadas.
+
+El análisis de centralidad permitió identificar nodos particularmente relevantes para la organización global de cada red. En Email-EU, los nodos con mayor centralidad de grado coincidieron parcialmente con aquellos de alta intermediación. Sin embargo, algunos nodos con conectividad moderada presentaron valores elevados de intermediación, indicando que actúan como puentes entre comunidades distintas y cumplen un rol crítico para la conectividad global.
+
+En \textit{C. elegans}, las neuronas con mayor PageRank también tendieron a presentar altos valores de in-degree, reflejando la existencia de nodos receptores altamente influyentes dentro de la red neuronal. No obstante, ciertas neuronas mostraron valores elevados de PageRank sin poseer necesariamente el mayor grado, indicando que la relevancia estructural depende también de la posición global dentro de la red.
+
+La detección de comunidades reveló una organización modular bien definida en ambas redes. El algoritmo de Louvain produjo particiones con modularidad elevada, indicando la existencia de subconjuntos de nodos más densamente conectados internamente que con el resto de la red. En Email-EU, las comunidades detectadas mostraron una correspondencia cualitativa importante con los departamentos institucionales provistos como metadata. Sin embargo, también se observaron comunidades mixtas y nodos puente entre departamentos, evidenciando interacción transversal significativa.
+
+En el caso de \textit{C. elegans}, las comunidades obtenidas parecieron asociarse a regiones funcionales o grupos neuronales con patrones de conectividad compartidos. La existencia de módulos relativamente compactos sugirió una organización parcialmente especializada del conectoma.
+
+El análisis de robustez constituyó el eje principal del trabajo. Bajo ataques aleatorios, ambas redes mostraron una degradación relativamente gradual del tamaño de la componente gigante. Este comportamiento es consistente con la robustez típica de redes heterogéneas frente a fallas aleatorias, donde la probabilidad de eliminar hubs críticos resulta baja.
+
+Sin embargo, las diferencias más importantes emergieron bajo ataques dirigidos. La eliminación de nodos según centralidad produjo una fragmentación mucho más rápida, especialmente en el conectoma de \textit{C. elegans}. Los ataques basados en degree y PageRank generaron colapsos abruptos de la componente gigante, evidenciando una fuerte dependencia estructural respecto a un conjunto reducido de neuronas altamente centrales.
+
+En Email-EU, aunque los ataques dirigidos también redujeron significativamente la conectividad global, la fragmentación ocurrió de forma más gradual. La presencia de múltiples caminos alternativos y una estructura modular más distribuida parecieron otorgar redundancia estructural adicional.
+
+La eficiencia global permitió detectar degradaciones funcionales incluso antes de observar fragmentación macroscópica. Durante ataques dirigidos, la eficiencia disminuyó rápidamente aun cuando la componente gigante seguía conteniendo una fracción considerable de nodos. Esto indica que la red pierde capacidad de comunicación efectiva antes de desintegrarse completamente.
+
+El análisis de los tamaños de fragmentos mostró diferencias cualitativas adicionales entre ambas redes. En \textit{C. elegans}, la eliminación de hubs produjo una transición relativamente abrupta desde una componente gigante dominante hacia múltiples fragmentos pequeños. En contraste, la red Email-EU mostró un proceso de fragmentación más progresivo, con aparición gradual de componentes intermedias antes del colapso global.
+
+Estos resultados sugieren que la arquitectura neuronal del conectoma está altamente optimizada para eficiencia y conectividad global, aunque a costa de una mayor vulnerabilidad frente a ataques dirigidos sobre nodos críticos. Por otro lado, la organización social de Email-EU parece incorporar mayor redundancia estructural y modularidad, favoreciendo una degradación más gradual ante perturbaciones.
+
+\section{Conclusiones}
+
+En este trabajo se realizó una caracterización comparativa de dos redes complejas de naturaleza distinta: una red social de intercambio de correos electrónicos y un conectoma neuronal biológico. A través de métricas topológicas globales, análisis de centralidad, detección de comunidades y estudios de robustez, se identificaron diferencias estructurales significativas entre ambas arquitecturas.
+
+La red Email-EU mostró una organización modular relativamente distribuida, con clustering elevado y múltiples caminos alternativos entre nodos. Estas propiedades favorecieron una degradación gradual frente a ataques dirigidos. En contraste, el conectoma de \textit{C. elegans} presentó una estructura más heterogénea y dependiente de nodos altamente centrales, lo que produjo una mayor susceptibilidad frente a la eliminación selectiva de hubs.
+
+La comparación con modelos prototipo permitió interpretar estas propiedades dentro del marco de redes complejas clásicas. Ningún modelo logró reproducir completamente la combinación simultánea de heterogeneidad, clustering elevado y modularidad observada en las redes reales, aunque los modelos tipo Barabási--Albert capturaron parcialmente la presencia de hubs estructurales.
+
+Los resultados obtenidos sugieren que existe un compromiso entre eficiencia global y robustez estructural. Redes altamente centralizadas pueden optimizar la transmisión de información y reducir distancias promedio, pero se vuelven más vulnerables frente a perturbaciones dirigidas. Por otro lado, arquitecturas más distribuidas y modulares tienden a presentar mayor resiliencia estructural.
